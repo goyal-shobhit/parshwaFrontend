@@ -1,0 +1,325 @@
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+import {
+  Box,
+  TextField,
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Select,
+  SelectChangeEvent,
+  Button,
+} from "@mui/material";
+import dayjs from "dayjs";
+import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import SVGrender from "./SVGrender";
+
+const BASEURL = process.env.REACT_APP_BASEURL;
+
+function DocketMUI() {
+   
+    
+  const [name, setName] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [hourWork, setHourWork] = useState("");
+  const [hourRate, setHourRate] = useState("");
+  const [supplierName, setSupplierName] = useState("");
+  const [PONumber, setPONumber] = useState("");
+  const [description, setDescription] = useState("");
+  
+  const [data, setData] = useState([]);
+  const [PONumberOptions, setPONumberOptions] = useState([]);
+  const [descriptionOptions, setDescriptionOptions] = useState([]);
+
+  useEffect(() => {
+    // fetch("http://localhost:3000/api/csv-data")
+    fetch(`${BASEURL}api/csv-data`)
+      .then((response) => response.json())
+      .then((data) => setData(data))
+      .catch((error) => console.error("Error fetching data: ", error));
+   
+  }, []);
+
+  const handleSupplierDropdownChange = (e) => {
+    const selectedValue = e.target.value;
+    setSupplierName(selectedValue);
+
+    const filteredOptions = data.filter(
+      (item) => item.Supplier === selectedValue
+    );
+    console.log(filteredOptions, "fol");
+    const PO = filteredOptions.map((item) => item.PONumber);
+    // console.log(PO)
+
+    setPONumberOptions(PO);
+  };
+
+  const handlePONumberDropdownChange = (e) => {
+    const selectedValue = e.target.value;
+    setPONumber(selectedValue);
+    console.log(data, "data fol");
+    const wpscode = data.filter((item) => item.PONumber === selectedValue)[0]
+      .WBSCode;
+    console.log(wpscode, "wpscode");
+    const filteredOptions = data.filter(
+      (item) => item.PONumber === selectedValue && item.WBSCode === wpscode
+    );
+    console.log(filteredOptions, "fol");
+    const PO = filteredOptions.map((item) => item.Description);
+    console.log(PO, "description");
+
+    setDescriptionOptions(PO);
+  };
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const body = {
+      name: name,
+      startTime: startTime,
+      endTime: endTime,
+      hourWork: hourWork,
+      hourRate: hourRate,
+      supplierName: supplierName,
+      PONumber: PONumber,
+      description: description,
+    };
+    console.log(body, "body");
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(body),
+      redirect: "follow",
+    };
+
+    fetch(`${BASEURL}createUser`, requestOptions)
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.log("error", error));
+  };
+
+  return (
+    <section className="login">
+      <div className="logo">
+        <SVGrender />
+        <h6>PARSHWA</h6>
+      </div>
+      <div className="leftside">
+        <div>
+          <img
+            className="img image1"
+            src="/auth-v2-login-illustration-light.png"
+            alt=""
+          />
+        </div>
+        <img className="img image2" src="/tree.png" alt="" />
+        <img className="img image3" src="/auth-v2-mask-light.png" alt="" />
+      </div>
+      <div className="righside" style={{ marginTop: "30px" }}>
+        <Box
+          component="form"
+          sx={{
+            //   "& > :not(style)": { m: 1, width: "50ch" },
+            display: "flex",
+            flexDirection: "column",
+            m: 2,
+            width: "50ch",
+          }}
+          noValidate
+          autoComplete="off"
+          onSubmit={handleFormSubmit}
+        >
+          {/* <form onSubmit={handleFormSubmit}> */}
+          <h1
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "black",
+            }}
+          >
+            Parshwa Holdings LLC
+          </h1>
+          <hr />
+          <br />
+
+          <br />
+
+          <TextField
+            id="outlined-basic"
+            label="Name"
+            variant="outlined"
+            sx={{ p: 1 }}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={["DatePicker", "DatePicker"]}>
+              {/* <DatePicker label="Start Time" defaultValue={dayjs('2022-04-17')} /> */}
+              <DemoItem>
+                <DatePicker
+                  sx={{ p: 1 }}
+                  slotProps={{
+                    textField: {
+                      error: false,
+                    },
+                  }}
+                  label="Start Time"
+                  value={startTime}
+                  onChange={(newValue) => setStartTime(newValue)}
+                />
+              </DemoItem>
+              <DemoItem>
+                <DatePicker
+                  sx={{ p: 1 }}
+                  slotProps={{
+                    textField: {
+                      error: false,
+                    },
+                  }}
+                  label="End Time"
+                  value={endTime}
+                  onChange={(newValue) => setEndTime(newValue)}
+                />
+              </DemoItem>
+            </DemoContainer>
+          </LocalizationProvider>
+
+          <TextField
+            sx={{ p: 1 }}
+            id="Hour_Work"
+            label="Hour Work"
+            variant="outlined"
+            value={hourWork}
+            onChange={(e) => setHourWork(e.target.value)}
+          />
+
+          <TextField
+            sx={{ p: 1 }}
+            id="Hour_Rate"
+            label="Hour Rate"
+            variant="outlined"
+            value={hourRate}
+            onChange={(e) => setHourRate(e.target.value)}
+          />
+
+          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-standard-label">
+              Supplier Name
+            </InputLabel>
+            <Select
+              sx={{ p: 1 }}
+              labelId="demo-simple-select-standard-label"
+              id="demo-simple-select-standard"
+              value={supplierName}
+              onChange={handleSupplierDropdownChange}
+              label="Supplier Name"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {data
+                .map((item) => item.Supplier)
+                .map(
+                  (item) =>
+                    item !== "" && <MenuItem value={item}>{item}</MenuItem>
+                )}
+            </Select>
+          </FormControl>
+
+          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-standard-label">
+              Purchase Order
+            </InputLabel>
+            <Select
+              labelId="demo-simple-select-standard-label"
+              id="demo-simple-select-standard"
+              value={PONumber}
+              onChange={handlePONumberDropdownChange}
+              label="Purchase Order"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {PONumberOptions.map((item) => (
+                <MenuItem value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+        
+
+          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-standard-label">
+              Description
+            </InputLabel>
+            <Select
+              labelId="demo-simple-select-standard-label"
+              id="demo-simple-select-standard"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              label="Description"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {descriptionOptions.map((item) => (
+                <MenuItem value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* <div>
+          <label>Description:</label>
+          <select
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          >
+            <option value="">Select an option</option>
+
+            {descriptionOptions.map((item) => (
+              <option key={item.id} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </div> */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* <button type="submit">Submit</button> */}
+            <Button variant="contained" type="submit">
+              Submit
+            </Button>
+          </div>
+          {/* </form> */}
+          <Link to="/docketList">
+            <p
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Show Docket List
+            </p>
+          </Link>
+        </Box>
+      </div>
+    </section>
+  );
+}
+
+export default DocketMUI;

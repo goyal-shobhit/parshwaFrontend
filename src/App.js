@@ -1,24 +1,15 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import DocketList from "./DocketList";
+import { Router as BrowserRouter, Route, Routes } from "react-router-dom";
+import DocketMUI from "./DocketMUI";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/" element={<DocketMUI />} />
+      <Route path="/docketList" element={<DocketList />} />
+    </Routes>
   );
 }
 
